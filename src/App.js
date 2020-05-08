@@ -59,28 +59,28 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    
-      const messaging = firebase.messaging();
-      messaging
-         .requestPermission()
-         .then(() => {
-            console.log("Have Permission");
-            return messaging.getToken();
-          })
-         .then(token => {
-            console.log("FCM Token:", token);
-            //you probably want to send your new found FCM token to the
-            //application server so that they can send any push
-            //notification to you.
-          })
-         .catch(error => {
-            if (error.code === "messaging/permission-blocked") {
-               console.log("Please Unblock Notification Request Manually");
-            } else {
-               console.log("Error Occurred", error);
-            }
-           });
-  
+
+    const messaging = firebase.messaging();
+    messaging
+      .requestPermission()
+      .then(() => {
+        console.log("Have Permission");
+        return messaging.getToken();
+      })
+      .then(token => {
+        console.log("FCM Token:", token);
+        //you probably want to send your new found FCM token to the
+        //application server so that they can send any push
+        //notification to you.
+      })
+      .catch(error => {
+        if (error.code === "messaging/permission-blocked") {
+          console.log("Please Unblock Notification Request Manually");
+        } else {
+          console.log("Error Occurred", error);
+        }
+      });
+
     db.doc("current-meeting/details").get().then(shot => {
       let data = shot.data();
       this.setState({
@@ -175,21 +175,23 @@ export class App extends Component {
   }
 
   addDetails = () => {
-    alert(this.state.phone)
-    db.doc(`users/${firebase.auth().currentUser.uid}`)
-      .set({
-        uid: firebase.auth().currentUser.uid,
-        email: firebase.auth().currentUser.displayName,
-        timestamp: Date.now(),
-        name: firebase.auth().currentUser.displayName,
-        phone: this.state.phone,
-        zname: this.state.zname,
-        photo: firebase.auth().currentUser.photoURL
-      }).then(() => {
-        this.setState({
-          detailsVerified: false
+    if (this.state.phone !== "" && this.state.zname !== "" && !isNaN(Number(this.state.phone)) && this.state.phone.length == 10)
+      db.doc(`users/${firebase.auth().currentUser.uid}`)
+        .set({
+          uid: firebase.auth().currentUser.uid,
+          email: firebase.auth().currentUser.displayName,
+          timestamp: Date.now(),
+          name: firebase.auth().currentUser.displayName,
+          phone: this.state.phone,
+          zname: this.state.zname,
+          photo: firebase.auth().currentUser.photoURL
+        }).then(() => {
+          this.setState({
+            detailsVerified: false
+          })
         })
-      })
+    else
+      alert("invalid details")
   }
   render() {
     return (
@@ -210,10 +212,12 @@ export class App extends Component {
         {this.state.detailsVerified ?
           <div>
             <p>Please add your personal details</p>
-            <lable>Phone Number:- </lable>
-            <input onChange={(e) => this.setState({ phone: e.target.value })} />
-            <lable>Zoom name:- </lable>
-            <input onChange={(e) => this.setState({ zname: e.target.value })} />
+            <p>  <lable>Phone Number:- </lable>
+              <input onChange={(e) => this.setState({ phone: e.target.value })} />
+            </p>
+            <p>   <lable>Zoom name:- </lable>
+              <input onChange={(e) => this.setState({ zname: e.target.value })} />
+            </p>
             <button onClick={this.addDetails}>Save</button>
           </div> :
           this.state.signedIn ?
